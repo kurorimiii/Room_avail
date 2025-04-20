@@ -50,11 +50,9 @@ def get_schedule():
         schedule = []
 
         current_time_obj = datetime.strptime(current_time, '%H:%M')
+        room_in_use = set()
 
-        # Create a dictionary to track room usage based on active classes
-        room_usage = {}
-
-        # Loop through the schedule and find rooms that are currently in use
+        # Step 1: Find all rooms that are occupied at the current time
         for row in rows:
             id = row[0]
             schedule_day = row[1]
@@ -69,12 +67,11 @@ def get_schedule():
             except ValueError:
                 continue
 
-            # Check if today's the scheduled day and if current time falls within the class time
+            # If today is the scheduled day and the current time is within the class time
             if schedule_day == day and start_time_obj <= current_time_obj <= end_time_obj:
-                # Mark this room as "in use" during this time
-                room_usage[room] = "Occupied (Auto)" if manual_override is None else "Occupied (Manual)"
+                room_in_use.add(room)
 
-        # Now, loop through the rooms and assign the correct status based on the room usage
+        # Step 2: Loop through the schedule and apply status logic
         for row in rows:
             id = row[0]
             schedule_day = row[1]
@@ -90,12 +87,22 @@ def get_schedule():
             except ValueError:
                 continue
 
-            # If the room is in use at the current time, mark it as "Occupied"
-            if schedule_day == day and room in room_usage:
-                status = room_usage[room]  # This will be either "Occupied (Auto)" or "Occupied (Manual)"
+            # Step 3: Handle manual override if there's an active class at the current time
+            if room in room_in_use:  # If room is in use at the current time
+                # Apply manual override if set
+                if manual_override == "available":
+                    status = "Available (Manual)"
+                elif manual_override == "occupied":
+                    status = "Occupied (Manual)"
+                else:
+                    status = "Occupied (Auto)"  # Default status when no manual override
             else:
-                # Otherwise, if the room is not in use, mark it as available
-                status = "Available (Auto)" if manual_override is None else "Available (Manual)"
+                if manual_override:
+                    # Allow both Available and Occupied to be set manually
+                    status = "Occupied (Manual)" if manual_override == "occupied" else "Available (Manual)"
+                else:
+                    # Default status for non-overlapping, free rooms
+                    status = "Available (Auto)"  # Default status when not in use
 
             schedule.append({
                 'id': id,
@@ -108,12 +115,9 @@ def get_schedule():
                 'status': status,
             })
 
-        # Sort the schedule by availability, so "Available" rooms come first
+        # Sort by availability, with "Available" rooms first
         schedule.sort(key=lambda x: ('Available' in x['status'], x['status'] != 'Available (Auto)'), reverse=True)
         return schedule
-
-
-
 
 
 @app.route('/')
