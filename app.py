@@ -54,15 +54,10 @@ def get_schedule(day_filter=None, subject_filter=None, section_filter=None, room
         if day_filter:
             query += " AND day = ?"
             params.append(day_filter)
-        if subject_filter:
-            query += " AND subject LIKE ?"
-            params.append(f"%{subject_filter}%")
-        if section_filter:
-            query += " AND section LIKE ?"
-            params.append(f"%{section_filter}%")
-        if room_filter:
-            query += " AND room LIKE ?"
-            params.append(f"%{room_filter}%")
+        if search:
+            query += " AND (subject LIKE ? OR section LIKE ? OR room LIKE ?)"
+            params.extend([f"%{search}%", f"%{search}%", f"%{search}%"])
+
 
         cursor.execute(query, params)
         rows = cursor.fetchall()
@@ -145,7 +140,7 @@ def index():
         section_filter = search
         room_filter = search
 
-        schedule_data = get_schedule(day_filter, subject_filter, section_filter, room_filter)
+        schedule_data = get_schedule(day_filter, search)
         user_role = session.get('role')
         return render_template('index.html', schedule=schedule_data, role=user_role)
     return render_template('home.html')
