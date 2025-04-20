@@ -41,7 +41,10 @@ def get_current_day_time():
     now = datetime.now(ph_tz)
     return now.strftime('%A'), now.strftime('%H:%M')
 
-def get_schedule(day_filter=None, subject_filter=None, section_filter=None, room_filter=None):
+def get_schedule(day_filter=None, search=None):
+    # Default to empty string if 'search' isn't provided in the request
+    search = request.args.get('search', '')  # Get search parameter from the query string
+
     day, current_time = get_current_day_time()
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
@@ -50,14 +53,15 @@ def get_schedule(day_filter=None, subject_filter=None, section_filter=None, room
         query = "SELECT * FROM RoomSchedule WHERE 1=1"
         params = []
 
-        # Apply filters dynamically if provided
+        # Apply day filter if provided
         if day_filter:
             query += " AND day = ?"
             params.append(day_filter)
+
+        # Apply search filter if provided
         if search:
             query += " AND (subject LIKE ? OR section LIKE ? OR room LIKE ?)"
             params.extend([f"%{search}%", f"%{search}%", f"%{search}%"])
-
 
         cursor.execute(query, params)
         rows = cursor.fetchall()
