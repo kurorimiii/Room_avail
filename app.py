@@ -138,17 +138,20 @@ def get_schedule(day_filter=None, subject_filter=None, section_filter=None, room
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if 'username' in session:
-        # Get filter parameters from the form (if any)
         day_filter = request.args.get('day')
-        subject_filter = request.args.get('subject')
-        section_filter = request.args.get('section')
-        room_filter = request.args.get('room')
+        search_query = request.args.get('search', '')
 
-        # Get the filtered schedule
-        schedule_data = get_schedule(day_filter, subject_filter, section_filter, room_filter)
+        # Pass search query as all three filters
+        schedule_data = get_schedule(
+            day_filter=day_filter,
+            subject_filter=search_query,
+            section_filter=search_query,
+            room_filter=search_query
+        )
         user_role = session.get('role')
         return render_template('index.html', schedule=schedule_data, role=user_role)
     return render_template('home.html')
+
 
 
 @app.route('/login', methods=['GET', 'POST'])
