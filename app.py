@@ -105,19 +105,10 @@ def get_schedule():
 
 @app.route('/')
 def index():
-    search = request.args.get('search', '').lower()
-    filter_day = request.args.get('day', '')
+    if 'username' in session:
+        return redirect('/schedule')  # redirect to the schedule page
+    return render_template('home.html')  # show login/signup
 
-    all_schedule = get_schedule()
-
-
-    filtered_schedule = [
-        row for row in all_schedule
-        if (search in row['subject'].lower() or search in row['section'].lower() or search in row['room'].lower())
-           and (row['day'] == filter_day if filter_day else True)
-    ]
-
-    return render_template('index.html', schedule=filtered_schedule, role=session.get('role'))
 
 
 @app.route('/login', methods=['GET', 'POST'])
