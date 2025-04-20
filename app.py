@@ -41,11 +41,30 @@ def get_current_day_time():
     now = datetime.now(ph_tz)
     return now.strftime('%A'), now.strftime('%H:%M')
 
-def get_schedule():
+def get_schedule(day_filter=None, subject_filter=None, section_filter=None, room_filter=None):
     day, current_time = get_current_day_time()
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM RoomSchedule")
+
+        # Build the base query
+        query = "SELECT * FROM RoomSchedule WHERE 1=1"
+        params = []
+
+        # Apply filters dynamically if provided
+        if day_filter:
+            query += " AND day = ?"
+            params.append(day_filter)
+        if subject_filter:
+            query += " AND subject LIKE ?"
+            params.append(f"%{subject_filter}%")
+        if section_filter:
+            query += " AND section LIKE ?"
+            params.append(f"%{section_filter}%")
+        if room_filter:
+            query += " AND room LIKE ?"
+            params.append(f"%{room_filter}%")
+
+        cursor.execute(query, params)
         rows = cursor.fetchall()
         schedule = []
 
@@ -67,7 +86,6 @@ def get_schedule():
             except ValueError:
                 continue
 
-            # If today is the scheduled day and the current time is within the class time
             if schedule_day == day and start_time_obj <= current_time_obj <= end_time_obj:
                 room_in_use.add(room)
 
@@ -87,22 +105,18 @@ def get_schedule():
             except ValueError:
                 continue
 
-            # Step 3: Handle manual override if there's an active class at the current time
-            if room in room_in_use:  # If room is in use at the current time
-                # Apply manual override if set
+            if room in room_in_use:
                 if manual_override == "available":
                     status = "Available (Manual)"
                 elif manual_override == "occupied":
                     status = "Occupied (Manual)"
                 else:
-                    status = "Occupied (Auto)"  # Default status when no manual override
+                    status = "Occupied (Auto)"
             else:
                 if manual_override:
-                    # Allow both Available and Occupied to be set manually
                     status = "Occupied (Manual)" if manual_override == "occupied" else "Available (Manual)"
                 else:
-                    # Default status for non-overlapping, free rooms
-                    status = "Available (Auto)"  # Default status when not in use
+                    status = "Available (Auto)"
 
             schedule.append({
                 'id': id,
@@ -120,10 +134,18 @@ def get_schedule():
         return schedule
 
 
-@app.route('/')
+
+@app.route('/', methods=['GET', 'POST'])
 def index():
     if 'username' in session:
-        schedule_data = get_schedule()
+        # Get filter parameters from the form (if any)
+        day_filter = request.args.get('day')
+        subject_filter = request.args.get('subject')
+        section_filter = request.args.get('section')
+        room_filter = request.args.get('room')
+
+        # Get the filtered schedule
+        schedule_data = get_schedule(day_filter, subject_filter, section_filter, room_filter)
         user_role = session.get('role')
         return render_template('index.html', schedule=schedule_data, role=user_role)
     return render_template('home.html')
