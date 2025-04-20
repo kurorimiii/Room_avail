@@ -107,7 +107,8 @@ def get_schedule():
 def index():
     if 'username' in session:
         schedule_data = get_schedule()
-        return render_template('index.html', schedule=schedule_data)
+        user_role = session.get('role')
+        return render_template('index.html', schedule=schedule_data, role=user_role)
     return render_template('home.html')
 
 
@@ -196,28 +197,21 @@ def override(schedule_id, action):
 
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT room, day, start_time, end_time FROM RoomSchedule WHERE id = ?", (schedule_id,))
+        cursor.execute("SELECT room, day FROM RoomSchedule WHERE id = ?", (schedule_id,))
         result = cursor.fetchone()
 
         if result:
-            room, day, start_time, end_time = result
-            current_day, current_time = get_current_day_time()
-            current_time_obj = datetime.strptime(current_time, '%H:%M')
-            start_time_obj = datetime.strptime(start_time, '%H:%M')
-            end_time_obj = datetime.strptime(end_time, '%H:%M')
-
-            if current_day == day and start_time_obj <= current_time_obj <= end_time_obj:
-                cursor.execute("""
-                    UPDATE RoomSchedule 
-                    SET manual_override = ? 
-                    WHERE room = ? 
-                    AND day = ?
-                """, (override_value, room, day))
-                conn.commit()
-            else:
-                return "Cannot override future schedules", 403
+            room, day = result
+            cursor.execute("""
+                UPDATE RoomSchedule 
+                SET manual_override = ? 
+                WHERE room = ? 
+                AND day = ?
+            """, (override_value, room, day))
+            conn.commit()
 
     return redirect('/')
+
 
 @app.route('/delete-schedule/<int:schedule_id>')
 def delete_schedule(schedule_id):
@@ -226,9 +220,9 @@ def delete_schedule(schedule_id):
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         cursor.execute("DELETE FROM RoomSchedule WHERE id = ?", (schedule_id,))
-        cursor.execute("VACUUM")
         conn.commit()
     return redirect('/')
+
 
 if __name__ == '__main__':
     init_db()
