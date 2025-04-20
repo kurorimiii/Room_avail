@@ -106,9 +106,9 @@ def get_schedule():
 @app.route('/')
 def index():
     if 'username' in session:
-        return redirect('/schedule')  # redirect to the schedule page
-    return render_template('home.html')  # show login/signup
-
+        schedule_data = get_schedule()
+        return render_template('index.html', schedule=schedule_data)
+    return render_template('home.html')
 
 
 @app.route('/login', methods=['GET', 'POST'])
