@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Room Availability Checker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .home-container {
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: #4CAF50;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            margin: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .login-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .signup-btn {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        .login-btn:hover {
+            background-color: #45a049;
+        }
+
+        .signup-btn:hover {
+            background-color: #1976D2;
+        }
+    </style>
+</head>
+<body>
+<div class="home-container">
+    <h1>Room Availability Checker</h1>
+    <p>Welcome! Please log in or sign up to continue.</p>
+    <a href="/login"><button class="btn login-btn">Login</button></a>
+    <a href="/signup"><button class="btn signup-btn">Sign Up</button></a>
+</div>
+</body>
+</html>
