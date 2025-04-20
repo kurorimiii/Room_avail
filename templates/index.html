@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Room Availability Checker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 10px 10px 10px 0;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        button:focus {
+            outline: none;
+        }
+
+        .logout-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .logout-btn {
+            background-color: #f44336;
+        }
+
+        .logout-btn:hover {
+            background-color: #e53935;
+        }
+
+        .grey-btn {
+            background-color: #9e9e9e;
+            color: white;
+        }
+
+        .grey-btn:hover {
+            background-color: #8c8c8c;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        td {
+            background-color: #f9f9f9;
+        }
+
+        .status-available {
+            color: green;
+        }
+
+        .status-occupied {
+            color: red;
+        }
+
+        .status-auto {
+            color: orange;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                width: 95%;
+            }
+
+            table {
+                font-size: 14px;
+            }
+
+            button {
+                width: 100%;
+                padding: 15px;
+                font-size: 18px;
+            }
+        }
+
+        .btn {
+            display: inline-block;
+            margin: 2px 0;
+            text-decoration: none;
+            color: #4CAF50;
+        }
+
+        .btn:hover {
+            text-decoration: underline;
+        }
+
+        .delete-btn {
+            color: red;
+        }
+
+        .delete-btn:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Room Availability Checker</h1>
+<form method="get" action="" style="margin: 20px 0; display: flex; flex-wrap: wrap; gap: 10px;">
+    <input type="text" name="search" placeholder="Search by subject, section, or room" value="{{ request.args.get('search', '') }}" style="padding: 10px; flex: 1; min-width: 200px;">
+    
+    <select name="day" style="padding: 10px; min-width: 160px;">
+        <option value="">Filter by day</option>
+        <option value="Sunday" {% if request.args.get('day') == 'Sunday' %}selected{% endif %}>Sunday</option>
+        <option value="Monday" {% if request.args.get('day') == 'Monday' %}selected{% endif %}>Monday</option>
+        <option value="Tuesday" {% if request.args.get('day') == 'Tuesday' %}selected{% endif %}>Tuesday</option>
+        <option value="Wednesday" {% if request.args.get('day') == 'Wednesday' %}selected{% endif %}>Wednesday</option>
+        <option value="Thursday" {% if request.args.get('day') == 'Thursday' %}selected{% endif %}>Thursday</option>
+        <option value="Friday" {% if request.args.get('day') == 'Friday' %}selected{% endif %}>Friday</option>
+        <option value="Saturday" {% if request.args.get('day') == 'Saturday' %}selected{% endif %}>Saturday</option>
+    </select>
+
+    <button type="submit">Apply</button>
+</form>
+
+    {% if session.username %}
+        <p>Welcome, {{ session.username }}!</p>
+        {% if role == 'admin' %}
+        <form action="/add" method="get"><button type="submit">Add Schedule</button></form>
+        {% endif %}
+        <table>
+            <tr>
+                <th>ID Number</th>
+                <th>Day</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Subject</th>
+                <th>Section</th>
+                <th>Room</th>
+                <th>Status</th>
+                {% if role == 'admin' %}
+                <th>Action</th>
+                {% endif %}
+            </tr>
+            {% for row in schedule %}
+            <tr>
+                <td>{{ row.id }}</td>
+                <td>{{ row.day }}</td>
+                <td>{{ row.start_time }}</td>
+                <td>{{ row.end_time }}</td>
+                <td>{{ row.subject }}</td>
+                <td>{{ row.section }}</td>
+                <td>{{ row.room }}</td>
+                <td class="{{ 'status-available' if 'available' in row.status|lower() else 'status-occupied' if 'occupied' in row.status|lower() else 'status-auto' }}">
+                    {{ row.status }}
+                </td>
+                {% if role == 'admin' %}
+                <td>
+                    <a href="/override/{{ row.id }}/available" class="btn">Set Available</a><br>
+                    <a href="/override/{{ row.id }}/occupied" class="btn">Set Occupied</a><br>
+                    <a href="/override/{{ row.id }}/auto" class="btn">Set Auto</a><br>
+                    <a href="/delete-schedule/{{ row.id }}" class="delete-btn">Delete</a>
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>Please <a href="/login">log in</a> to access the schedule.</p>
+    {% endif %}
+</div>
+
+{% if session.username %}
+<div class="logout-container">
+    {% if role == 'admin' %}
+    <form action="/add-admin" method="get"><button type="submit" class="grey-btn">Add New Admin</button></form>
+    {% endif %}
+    <form action="/logout" method="get"><button type="submit" class="logout-btn">Logout</button></form>
+</div>
+{% endif %}
+</body>
+</html>

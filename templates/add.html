@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Schedule</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px auto;
+            max-width: 500px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="time"] {
+            padding: 10px;
+            border: 1px solid #bbb;
+            border-radius: 5px;
+            font-size: 15px;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        button,
+        .cancel-button {
+            padding: 10px 16px;
+            font-size: 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            flex: 1;
+            text-align: center;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .cancel-button {
+            background-color: #e74c3c;
+            color: white;
+            text-decoration: none;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .cancel-button:hover {
+            background-color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <h1>Add Schedule</h1>
+    <form action="/add" method="post">
+        <label for="day">Day:</label>
+        <input type="text" name="day" required>
+
+        <label for="start_time">Start Time:</label>
+        <input type="time" name="start_time" required>
+
+        <label for="end_time">End Time:</label>
+        <input type="time" name="end_time" required>
+
+        <label for="subject">Subject:</label>
+        <input type="text" name="subject" required>
+
+        <label for="section">Section:</label>
+        <input type="text" name="section" required>
+
+        <label for="room">Room:</label>
+        <input type="text" name="room" required>
+
+        <div class="button-group">
+            <button type="submit">Add Schedule</button>
+            <a href="/" class="cancel-button">Cancel</a>
+        </div>
+    </form>
+</body>
+</html>
