@@ -67,19 +67,25 @@ def get_schedule():
             except ValueError:
                 continue
 
+            # Check if current time is within the room's scheduled time
             if schedule_day == day and start_time_obj <= current_time_obj <= end_time_obj:
                 room_in_use.add(room)
 
+            # Determine the status based on whether the room is occupied or manually overridden
             if room in room_in_use:
-                status = "Occupied (Manual)" if manual_override == "occupied" else \
-                         "Available (Manual)" if manual_override == "available" else \
-                         "Occupied (Auto)"
+                if manual_override == "occupied":
+                    status = "Occupied (Manual)"
+                elif manual_override == "available":
+                    status = "Available (Manual)"
+                else:
+                    status = "Occupied (Auto)"
             else:
                 if manual_override:
                     status = "Occupied (Manual)" if manual_override == "occupied" else "Available (Manual)"
                 else:
                     status = "Available (Auto)"
 
+            # Check if the room is overlapping with another schedule for the same day
             cursor.execute("""
                 SELECT * FROM RoomSchedule 
                 WHERE room = ? AND day = ? AND id != ? 
@@ -89,6 +95,7 @@ def get_schedule():
             if cursor.fetchall():
                 status = "Occupied (Auto)"
 
+            # Add the schedule entry to the list
             schedule.append({
                 'id': id,
                 'day': schedule_day,
@@ -100,8 +107,10 @@ def get_schedule():
                 'status': status,
             })
 
+        # Sort the schedule by availability
         schedule.sort(key=lambda x: ('Available' in x['status'], x['status'] != 'Available (Auto)'), reverse=True)
         return schedule
+
 
 @app.route('/')
 def index():
