@@ -4,9 +4,16 @@
     <meta charset="UTF-8">
     <title>Add Admin</title>
     <style>
+        :root {
+            --main-purple: #b19cd9;
+            --dark-purple: #8e6dcf;
+            --hover-purple: #a188d4;
+            --light-bg: #f9f6fc;
+        }
+
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f4f4f4;
+            background-color: var(--light-bg);
             margin: 0;
             padding: 0;
             display: flex;
@@ -18,7 +25,7 @@
         .form-container {
             background-color: #ffffff;
             padding: 30px 40px;
-            border-radius: 10px;
+            border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             width: 100%;
             max-width: 400px;
@@ -26,53 +33,63 @@
 
         h2 {
             text-align: center;
-            color: #4CAF50;
-            margin-bottom: 20px;
+            color: var(--main-purple);
+            margin-bottom: 25px;
         }
 
         label {
             display: block;
             margin-bottom: 6px;
-            color: #333;
+            color: #444;
+            font-weight: bold;
         }
 
         input[type="text"],
         input[type="password"] {
             width: 100%;
             padding: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
             border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
+            border-radius: 8px;
             font-size: 14px;
+            background-color: #fff;
+            box-sizing: border-box;
         }
 
         button {
             width: 100%;
             padding: 12px;
-            background-color: #4CAF50;
+            background-color: var(--main-purple);
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 30px;
             font-size: 16px;
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
 
         button:hover {
-            background-color: #45a049;
+            background-color: var(--hover-purple);
         }
 
         .back-link {
             display: block;
             text-align: center;
             margin-top: 15px;
-            color: #555;
+            color: #666;
             text-decoration: none;
+            font-size: 14px;
         }
 
         .back-link:hover {
+            color: var(--dark-purple);
             text-decoration: underline;
+        }
+
+        @media (max-width: 600px) {
+            .form-container {
+                padding: 20px;
+            }
         }
     </style>
 </head>
